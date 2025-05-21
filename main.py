@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 from auth_requests.api_client import APIClient
 
@@ -13,7 +14,7 @@ def main():
 
     print("Lendo planilha de entrada...")
     df = pd.read_excel(input_path, dtype=str, engine="openpyxl")
-    for col in ["Prospect", "mumero_negociacao", "Erro_Integracao"]:
+    for col in ["Prospect", "mumero_negociacao", "numero_instalacao", "Erro_Integracao"]:
         if col not in df.columns:
             df[col] = ""
 
@@ -31,12 +32,17 @@ def main():
                 mumero_negociacao, erro_negoc = client.consulta_negociacao(codpap)
                 df.at[i, "mumero_negociacao"] = mumero_negociacao
                 erro += erro_negoc
+                numero_instalacao, erro_inst = client.consulta_numero_instalacao(codpap)
+                df.at[i, "numero_instalacao"] = numero_instalacao
+                erro += erro_inst
             else:
                 df.at[i, "mumero_negociacao"] = ""
+                df.at[i, "numero_instalacao"] = ""
         else:
             erro = "CPF_CNPJ não informado"
             df.at[i, "Prospect"] = ""
             df.at[i, "mumero_negociacao"] = ""
+            df.at[i, "numero_instalacao"] = ""
         df.at[i, "Erro_Integracao"] = erro
 
     print("\nSalvando planilha de saída...")
@@ -44,6 +50,7 @@ def main():
     print(f"Processo finalizado! Planilha salva como: {output_path}")
 
     client.stop_token_auto_refresh()
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

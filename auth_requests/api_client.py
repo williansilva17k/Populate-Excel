@@ -66,8 +66,11 @@ class APIClient:
 
         def refresh_loop():
             while not self._stop_refresh.is_set():
+                # Troca sleep por wait, que é interrompível!
+                self._stop_refresh.wait(interval_seconds)
+                if self._stop_refresh.is_set():
+                    break
                 try:
-                    time.sleep(interval_seconds)
                     print("\nRenovando token de acesso automaticamente...")
                     self.authenticate()
                     self.login()
@@ -176,3 +179,54 @@ class APIClient:
             except:
                 msg = str(e)
             return "", f"Erro em mumero_negociacao: {msg}"
+
+    def consulta_numero_instalacao(self, codpap):
+        print(f"Consultando numero_instalacao para CODPAP: {codpap} ...")
+        url = "https://dev-api.energisa.io/sankhya/v1/loadrecords?outputType=json"
+        headers = {
+            "Content-Type": "application/json",
+            "client_id": os.getenv("ENERGISA_CLIENT_ID"),
+            "access_token": self.token
+        }
+        cookies = {"JSESSIONID": self.jsessionid} if self.jsessionid else None
+        payload = {
+            "serviceName": "CRUDServiceProvider.loadRecords",
+            "requestBody": {
+                "dataSet": {
+                    "rootEntity": "AD_INSTPROSP",
+                    "includePresentationFields": "N",
+                    "offsetPage": "0",
+                    "criteria": {
+                        "expression": {
+                            "$": f"this.CODPAP = {codpap}"
+                        }
+                    },
+                    "entity": {
+                        "fieldset": {
+                            "list": "CODPAP,NROUNICO,ATIVO,NROINSTALACAO,CODDISTRIBUIDORA"
+                        }
+                    }
+                }
+            }
+        }
+        response = self.session.post(url, headers=headers, json=payload, cookies=cookies)
+        try:
+            data = response.json()
+            print(f"Resposta da consulta: {data}")
+            entities = data["responseBody"]["entities"]["entity"]
+            if isinstance(entities, list):
+                nros = [item.get("f3", {}).get("$", "") for item in entities if "f3" in item and item.get("f3", {}).get("$", "")]
+                numero_instalacao = ";".join(nros)
+            elif isinstance(entities, dict):
+                numero_instalacao = entities.get("f3", {}).get("$", "")
+            else:
+                numero_instalacao = ""
+            print(f"numero_instalacao encontrado para CODPAP {codpap}: {numero_instalacao}")
+            return numero_instalacao, ""
+        except Exception as e:
+            print(f"Nenhum numero_instalacao encontrada para CODPAP {codpap}. Erro: {e}")
+            try:
+                msg = data.get('statusMessage', str(e))
+            except:
+                msg = str(e)
+            return "", f"Erro em numero_instalacao: {msg}"
