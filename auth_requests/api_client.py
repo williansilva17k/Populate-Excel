@@ -17,9 +17,9 @@ class APIClient:
 
     def authenticate(self):
         print("Iniciando autenticação...")
-        url = "https://api.energisa.io/oauth/access-token"
+        url = os.getenv("ENERGISE_AUTH_URL")
         headers = {
-            "Authorization": os.getenv("ENERGISA_AUTH_HEADER"),
+            "Authorization": os.getenv("ENERGISE_AUTH_HEADER"),
             "Content-Type": "application/json",
         }
         payload = {
@@ -37,10 +37,10 @@ class APIClient:
 
     def login(self):
         print("Realizando login...")
-        url = "https://dev-api.energisa.io/sankhya/v1/login?outputType=json"
+        url = os.getenv("ENERGISE_LOGIN_URL")
         headers = {
             "Content-Type": "application/json",
-            "client_id": os.getenv("ENERGISA_CLIENT_ID"),
+            "client_id": os.getenv("ENERGISE_CLIENT_ID"),
             "access_token": self.token
         }
         payload = {
@@ -88,10 +88,10 @@ class APIClient:
 
     def consulta_prospect(self, cpf_cnpj):
         print(f"Consultando Prospect para CPF/CNPJ: {cpf_cnpj} ...")
-        url = "https://dev-api.energisa.io/sankhya/v1/loadrecords?outputType=json"
+        url = os.getenv("ENERGISE_CONSULT_URL")
         headers = {
             "Content-Type": "application/json",
-            "client_id": os.getenv("ENERGISA_CLIENT_ID"),
+            "client_id": os.getenv("ENERGISE_CLIENT_ID"),
             "access_token": self.token
         }
         cookies = {"JSESSIONID": self.jsessionid} if self.jsessionid else None
@@ -132,10 +132,10 @@ class APIClient:
 
     def consulta_negociacao(self, codpap):
         print(f"Consultando mumero_negociacao para CODPAP: {codpap} ...")
-        url = "https://dev-api.energisa.io/sankhya/v1/loadrecords?outputType=json"
+        url = os.getenv("ENERGISE_CONSULT_URL")
         headers = {
             "Content-Type": "application/json",
-            "client_id": os.getenv("ENERGISA_CLIENT_ID"),
+            "client_id": os.getenv("ENERGISE_CLIENT_ID"),
             "access_token": self.token
         }
         cookies = {"JSESSIONID": self.jsessionid} if self.jsessionid else None
@@ -182,10 +182,10 @@ class APIClient:
 
     def consulta_numero_instalacao(self, codpap):
         print(f"Consultando numero_instalacao para CODPAP: {codpap} ...")
-        url = "https://dev-api.energisa.io/sankhya/v1/loadrecords?outputType=json"
+        url = os.getenv("ENERGISE_CONSULT_URL")
         headers = {
             "Content-Type": "application/json",
-            "client_id": os.getenv("ENERGISA_CLIENT_ID"),
+            "client_id": os.getenv("ENERGISE_CLIENT_ID"),
             "access_token": self.token
         }
         cookies = {"JSESSIONID": self.jsessionid} if self.jsessionid else None
